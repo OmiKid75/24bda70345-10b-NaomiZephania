@@ -12,8 +12,8 @@ interface Post {
   createdAt: string;
 }
 
-export default function PostPage() {
-  const { id } = useParams();
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
 

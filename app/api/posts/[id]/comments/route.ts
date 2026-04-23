@@ -4,13 +4,15 @@ import { connectDB } from '../../../../../lib/db';
 import { getSession, unauthorized } from '../../../../../lib/api-utils';
 import { getCommentsByPost, createComment } from '../../../../../services/comments';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   try {
     const session = await getSession();
     if (!session) return unauthorized();
 
     await connectDB();
-    const comments = await getCommentsByPost(params.id);
+    const comments = await getCommentsByPost(id);
     return NextResponse.json(comments, { status: StatusCodes.OK });
 
   } catch (error: any) {
@@ -21,7 +23,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   try {
     const session = await getSession();
     if (!session) return unauthorized();
@@ -36,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       );
     }
 
-    const comment = await createComment(params.id, session.id as string, content);
+    const comment = await createComment(id, session.id as string, content);
     return NextResponse.json(comment, { status: StatusCodes.CREATED });
 
   } catch (error: any) {

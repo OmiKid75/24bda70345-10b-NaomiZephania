@@ -4,13 +4,15 @@ import { connectDB } from '../../../../lib/db';
 import { getSession, unauthorized } from '../../../../lib/api-utils';
 import { getPostById, deletePost } from '../../../../services/posts';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   try {
     const session = await getSession();
     if (!session) return unauthorized();
 
     await connectDB();
-    const post = await getPostById(params.id);
+    const post = await getPostById(id);
 
     if (!post) {
       return NextResponse.json(
@@ -29,13 +31,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   try {
     const session = await getSession();
     if (!session) return unauthorized();
 
     await connectDB();
-    const deleted = await deletePost(params.id, session.id as string);
+    const deleted = await deletePost(id, session.id as string);
 
     if (!deleted) {
       return NextResponse.json(
